@@ -124,7 +124,7 @@ pkm.data-path=/data/pkm/
 ```
 这里看到提取出变量password，并且判断是否为空。在不为空的情况下通过aesKeyFrom函数生成ADMIN_KEY，类型为字节数组。当然目前还不知道ADMIN_KEY是拿来干嘛的，待后面继续分析。
 
-前面讲过，这个服务本质是一个spring mvc的web工程，spring mvc一般都有Controller，Service，Repository对应于MVC。
+前面讲过，这个服务本质是一个spring mvc的web工程，spring mvc一般都有`Controller，Service，Repository`对应于MVC。
 
 当然本工程大量采用了注解的方式，这样给我们提供了源码分析很多方便。
 
@@ -152,7 +152,7 @@ public String generateService() {
 ```
 ResGenerateService resGenerateService = godService.generateService();
 ```
-跟踪函数 `generateService()`的实现，在com.rst.pkm.service.impl.GodServiceImpl类里面实现了`generateService()`函数：
+跟踪函数 `generateService()`的实现，在`com.rst.pkm.service.impl.GodServiceImpl`类里面实现了`generateService()`函数：
 
 ```
 public ResGenerateService generateService() {
@@ -268,7 +268,7 @@ private class FileData {
 ```
 从代码里面看到有两个变量。
 
-回到save函数，将randomKey保存到FileData对象，将ServiceProfile保存serviceProfiles这个类型为ServiceProfile的List里面。然后将FileData对象转换为一个json格式的数据并且使用Constant.ADMIN_KEY作为输入密码进行aes加密。Constant.ADMIN_KEY在前面信息收集阶段已经分析过是怎么来的了。现在知道了Constant.ADMIN_KEY是拿来干嘛的。
+回到save函数，将randomKey保存到FileData对象，将ServiceProfile保存serviceProfiles这个类型为ServiceProfile的List里面。然后将FileData对象转换为一个json格式的数据并且使用`Constant.ADMIN_KEY`作为输入密码进行aes加密。`Constant.ADMIN_KEY`在前面信息收集阶段已经分析过是怎么来的了。现在知道了`Constant.ADMIN_KEY`是拿来干嘛的。
 
 然后调用`FileUtil.save(Converter.byteArrayToHexString(content), savePath + FILE_NAME);`把数据持久化的保存到硬盘上面，这里的savePath已经分析过了，` service-profile ` 为 `service-profile ` 。
 
@@ -281,7 +281,7 @@ private class FileData {
 >这里需要注意的是，在ServiceProfileDao里面有一个init的函数，并且被注解为@PostConstruct。对于这个注解详细的定义可以自行百度或者是google，简单来说就是一个spring扫描javabean的时候会初始化。
 >我们来看看这个init函数是拿来干嘛的，通过分析init函数源码主要实现了几个功能：
 >- 初始化前面分析到的serviceProfileMap这个HashMap。
->- 在service-profile和备份的service-profile文件不为空的情况下提取出来数据，并且在经过相关的解密后从新把数据封装到serviceProfile和serviceProfileMap。至于具体为什么要这样做，在分析了签名接口后，就明白了。签名需要使用到的私钥这些，并不会从service-profile文件里面去取，而是直接从前面这两个对象去取值。我猜测是这里的初始化就是防止掉电之类导致服务重启后内存里面这些数据是空的，因此在加载Javabean的时候就进行初始化。
+>- 在service-profile和备份的service-profile文件不为空的情况下提取出来数据，并且在经过相关的解密后从新把数据封装到serviceProfile和serviceProfileMap。至于具体为什么要这样做，在分析了签名接口后，就明白了。签名需要使用到的私钥这些，并不会从`service-profile`文件里面去取，而是直接从前面这两个对象去取值。我猜测是这里的初始化就是防止掉电之类导致服务重启后内存里面这些数据是空的，因此在加载Javabean的时候就进行初始化。
 
 
 至于这个接口生成的公私钥对以及aesKey拿来做什么的，可以从ofgp网关的配置上看得出来
@@ -404,7 +404,7 @@ public static ECDSASignature sign(byte[] hash, byte[] privateKey, int type) {
 
 这里我们分析KeyController：
 
-我们从KeyController这个类里面看到@RestController，说明这是一个restful风格的controller。有三个url分别是/generate，/sign和/verify，那么我们来一个个的分析。
+我们从KeyController这个类里面看到@RestController，说明这是一个restful风格的controller。有三个url分别是`/generate`，`/sign`和/verify，那么我们来一个个的分析。
 
 #### /generate
 
@@ -448,7 +448,7 @@ public static class Key {
 ```
 很简单，公钥和公钥哈希。
 
-我们重点分析 `keyService.generateKey(body.getServiceId()))); `。在com.rst.pkm.service.impl.KeyServiceImpl类里面实现了generateKey方法。
+我们重点分析 `keyService.generateKey(body.getServiceId()))); `。在`com.rst.pkm.service.impl.KeyServiceImpl`类里面实现了generateKey方法。
 
 ```
 public byte[] generateKey(String serviceId) {
@@ -467,7 +467,7 @@ public byte[] generateKey(String serviceId) {
 
 3.把前面生成的公私钥和传入过来的serviceid一起通过函数save保存起来。
 
-我们再分析一下save函数是怎么保存公私钥和serviceid的。com.rst.pkm.service.impl.KeystoreServiceImpl类实现了save方法，代码如下：
+我们再分析一下save函数是怎么保存公私钥和serviceid的。`com.rst.pkm.service.impl.KeystoreServiceImpl`类实现了save方法，代码如下：
 
 ```
 public void save(String serviceId, byte[] privateKey, byte[] publicKey) {
@@ -521,7 +521,7 @@ public ServiceProfile findByServiceId(String serviceId) {
 @Value("${pkm.data-path}")
 private String savePath;
 ```
-通过注解的方式去获取 ` pkm.data-path ` 变量的值。前面分析 ` application.properties ` 的时候说过，里面有一个变量就是 ` pkm.data-path=/data/pkm/ ` 。分析loadRandomKey函数其实就是去/data/pkm/路径下的random-key文件里面提取出randomKey。
+通过注解的方式去获取 ` pkm.data-path ` 变量的值。前面分析 ` application.properties ` 的时候说过，里面有一个变量就是 ` pkm.data-path=/data/pkm/ ` 。分析loadRandomKey函数其实就是去`/data/pkm/`路径下的`random-key`文件里面提取出randomKey。
 使用randomKey作为输入密钥对AesHex做aes解密后拿到明文的AesHex，并且从新封装到profile这个对象里面。
 
 这里的serviceProfileMap、aesKey怎么来的，都是在前面分析GodController的`/createService `的时候已经分析过了，这里就不用再做解释说明了。
@@ -693,7 +693,8 @@ public boolean verify(String dataHex, String pubHashHex, String rHex, String sHe
 如果不为空，那么将会走到下面分支：
 
 ```
-verifyResult = keyService.verify(Converter.hexStringToByteArray(body.getInputHex()),            Converter.hexStringToByteArray(body.getPubKeyHash()),
+verifyResult = keyService.verify(Converter.hexStringToByteArray(body.getInputHex()),            
+Converter.hexStringToByteArray(body.getPubKeyHash()),
 Converter.hexStringToByteArray(body.getSignatureDerHex()));
 ```
 
@@ -808,14 +809,14 @@ public boolean preHandle(HttpServletRequest request,
     return true;
 }
 ```
-从上面代码可以看到，god这个目录第所有接口应该是一个管理接口，所以只允许127.0.0.1地址访问，其实也就是只能在本机上面发起http请求访问这个目录下的接口。从访问控制权限上面就限制了禁止非本机发起http请求。
+从上面代码可以看到，god这个目录第所有接口应该是一个管理接口，所以只允许`127.0.0.1`地址访问，其实也就是只能在本机上面发起http请求访问这个目录下的接口。从访问控制权限上面就限制了禁止非本机发起http请求。
 
 ## 总结
 
 
 ### 接口访问控制权限
 
-> - `/god`路径下的管理接口只能本机127.0.0.1访问。
+> - `/god`路径下的管理接口通过限制ip的方式只能本机`127.0.0.1`访问，并且在自定义报文头里面添加`password`字段来限制访问控制。
 > - 通过在管理配置配置允许访问ip的白名单，以及通过在http的报文头部添加serviceid这样的字段来限制/key路径下的业务接口的访问控制权限。
 
 ### 密钥管理
@@ -831,6 +832,7 @@ public boolean preHandle(HttpServletRequest request,
 ### 基础环境
 
 >   - 基础环境的对外端口关闭，登录跳板机的方式访问pkm的服务器。
+>   - 最小权限话，采用非root账号启动服务。
 >   - 采用docker的方式部署pkm服务。
 
 
